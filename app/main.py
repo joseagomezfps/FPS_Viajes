@@ -15,10 +15,19 @@ app = FastAPI(
     description="API para coordinar viajes compartidos aficionados a partidos de fútbol"
 )
 
+# Lista de dominios permitidos para conectar con la API
+
+origins = [
+    "https://viajes.fpsevillistas.com",
+    "http://viajes.fpsevillistas.com",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+]
+
 # Permitir peticiones desde el frontend (CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción especificar el dominio del frontend
+    allow_origins=["origins"],  # En producción especificar el dominio del frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
