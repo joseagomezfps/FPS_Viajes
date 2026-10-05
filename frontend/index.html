@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FPS Viajes | Federación de Peñas Sevillistas "San Fernando"</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Montserrat & Inter para tipografía corporativa -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fps: {
+              red: '#c4122d',       // Rojo corporativo sevillista
+              darkred: '#8b0c1e',   // Carmesí / granate intenso
+              deep: '#1a0306',      // Granate profundo
+              black: '#121212',     // Negro carbón
+              slate: '#262626',
+              gray: '#f5f6f8',
+              border: '#e5e7eb'
+            }
+          },
+          fontFamily: {
+            title: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [v-cloak] { display: none; }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-title { font-family: 'Montserrat', sans-serif; }
+  </style>
+</head>
+<body class="bg-fps-gray text-fps-slate min-h-screen flex flex-col selection:bg-fps-red selection:text-white">
+<div id="app" v-cloak class="flex-1 flex flex-col">
+  <!-- Línea superior de acento corporativo -->
+  <div class="h-1 bg-gradient-to-r from-fps-darkred via-fps-red to-fps-darkred"></div>
+
+  <!-- Cabecera institucional con el logo a todo lo ancho -->
+  <header class="bg-white border-b border-fps-border shadow-sm">
+    <div class="w-full bg-white border-b border-neutral-100 py-3 px-4">
+      <div class="max-w-4xl mx-auto flex items-center justify-center">
+        <!-- Logo de la Federación presidiendo a todo lo ancho -->
+        <img 
+          src="logo-fps.png" 
+          alt="Federación de Peñas Sevillistas San Fernando" 
+          class="w-full max-w-xl h-auto object-contain cursor-pointer"
+          @click="tab = 'trips'"
+        >
+      </div>
+    </div>
+
+    <!-- Barra de estado y título de la app -->
+    <div class="bg-neutral-900 text-white border-t border-neutral-800">
+      <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-fps-red inline-block"></span>
+          <h1 class="text-sm sm:text-base font-black tracking-wider uppercase font-title">
+            FPS <span class="text-fps-red">VIAJES</span>
+          </h1>
+          <span class="text-[11px] text-neutral-400 hidden sm:inline border-l border-neutral-700 pl-2">
+            Plataforma Oficial de Desplazamientos Compartidos
+          </span>
+        </div>
+
+        <div>
+          <button v-if="token" @click="logout" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1.5 rounded font-semibold transition border border-neutral-700">
+            Cerrar Sesión
+          </button>
+          <button v-else @click="tab = 'auth'" class="text-xs bg-fps-red hover:bg-fps-darkred text-white px-3.5 py-1.5 rounded font-bold uppercase tracking-wider transition shadow-sm">
+            Acceder
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de navegación por pestañas -->
+    <div class="bg-fps-black border-t border-neutral-800">
+      <nav class="max-w-4xl mx-auto px-4 flex">
+        <button @click="tab = 'trips'" :class="tab === 'trips' ? 'border-b-2 border-fps-red text-white bg-white/5 font-bold' : 'text-neutral-400 hover:text-white font-medium'" class="py-3 px-4 text-xs uppercase tracking-wider transition">
+          Buscar Viajes
+        </button>
+        <button @click="tab = 'publish'" :class="tab === 'publish' ? 'border-b-2 border-fps-red text-white bg-white/5 font-bold' : 'text-neutral-400 hover:text-white font-medium'" class="py-3 px-4 text-xs uppercase tracking-wider transition">
+          Ofrecer Coche
+        </button>
+        <button @click="tab = 'auth'" :class="tab === 'auth' ? 'border-b-2 border-fps-red text-white bg-white/5 font-bold' : 'text-neutral-400 hover:text-white font-medium'" class="py-3 px-4 text-xs uppercase tracking-wider transition">
+          Mi Cuenta
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenedor reactivo principal -->
+  
+    <main class="max-w-4xl w-full mx-auto p-4 py-6 flex-1">
+
+      <!-- ==================== PESTAÑA 1: EXPLORAR VIAJES ==================== -->
+      <section v-if="tab === 'trips'" class="space-y-5">
+        
+        <!-- Banner corporativo de viajes -->
+        <div class="bg-gradient-to-r from-fps-deep via-fps-darkred to-fps-red text-white p-5 rounded-xl shadow-md border border-neutral-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-widest bg-black/40 text-neutral-200 border border-white/10 mb-1.5">Coordinación de Peñas</span>
+            <h2 class="text-xl sm:text-2xl font-black uppercase tracking-tight font-title">Viaja con el Sevillismo</h2>
+            <p class="text-xs text-neutral-200 max-w-lg mt-0.5">Sigue al Sevilla FC compartiendo plazas de vehículo de forma económica y segura entre aficionados y peñistas.</p>
+          </div>
+          <button @click="tab = 'publish'" class="self-start sm:self-center whitespace-nowrap bg-white text-fps-darkred hover:bg-neutral-100 font-bold text-xs uppercase px-4 py-2.5 rounded-lg shadow transition">
+            Ofrecer Coche
+          </button>
+        </div>
+
+        <!-- Buscador -->
+        <div class="bg-white p-3.5 rounded-xl border border-fps-border shadow-sm flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <svg class="w-4 h-4 text-neutral-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input v-model="filterOrigin" @keyup.enter="fetchTrips" type="text" placeholder="Filtrar por ciudad o localidad de salida..." class="w-full pl-9 pr-3 py-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fps-red bg-neutral-50/50">
+          </div>
+          <button @click="fetchTrips" class="bg-fps-black hover:bg-neutral-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition">
+            Buscar
+          </button>
+        </div>
+
+        <!-- Estados de carga y vacío -->
+        <div v-if="loading" class="text-center py-12 text-neutral-400 font-medium text-sm">
+          <svg class="animate-spin h-6 w-6 text-fps-red mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          Cargando desplazamientos disponibles...
+        </div>
+
+        <div v-else-if="trips.length === 0" class="bg-white p-10 rounded-xl text-center border border-fps-border shadow-sm">
+          <div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 text-neutral-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="text-sm font-bold text-fps-black uppercase mb-1">No hay plazas ofertadas</h3>
+          <p class="text-xs text-neutral-500 max-w-sm mx-auto">No existen viajes registrados para ese criterio de búsqueda. Puedes ser el primero en publicar un coche.</p>
+        </div>
+
+        <!-- Listado de viajes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="trip in trips" :key="trip.id" class="bg-white rounded-xl shadow-sm border border-fps-border overflow-hidden flex flex-col justify-between hover:border-fps-red transition">
+            <div>
+              <div class="bg-neutral-50 p-4 border-b border-fps-border flex justify-between items-start">
+                <div>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-red-50 text-fps-red border border-red-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-fps-red"></span>
+                    {{ trip.match.home_team }} vs {{ trip.match.away_team }}
+                  </span>
+                  <h3 class="text-base font-extrabold text-fps-black mt-2 leading-tight">
+                    {{ trip.origin_city }} <span class="text-fps-red">➔</span> {{ trip.match.city }}
+                  </h3>
+                  <p class="text-xs text-neutral-500 font-medium">{{ trip.match.stadium }}</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl font-black text-fps-black">{{ trip.price_per_seat }}€</span>
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">por plaza</p>
+                </div>
+              </div>
+
+              <div class="p-4 space-y-2 text-xs text-neutral-600">
+                <p>📍 <strong class="text-neutral-800">Punto de encuentro:</strong> {{ trip.meeting_point }}</p>
+                <p>🕒 <strong class="text-neutral-800">Salida:</strong> {{ formatDate(trip.departure_time) }}</p>
+                <p v-if="trip.vehicle_info">🚗 <strong class="text-neutral-800">Vehículo:</strong> {{ trip.vehicle_info }}</p>
+                <p v-if="trip.notes" class="mt-2 p-2 rounded bg-neutral-50 border border-neutral-200 text-[11px] italic">
+                  "{{ trip.notes }}"
+                </p>
+              </div>
+            </div>
+
+            <div class="p-4 pt-3 bg-neutral-50 border-t border-fps-border flex justify-between items-center">
+              <div>
+                <p class="text-[11px] text-neutral-500">Conductor: <strong class="text-neutral-800">{{ trip.driver.full_name }}</strong></p>
+                <p class="text-xs font-black text-fps-red">{{ trip.available_seats }} plazas libres</p>
+              </div>
+              <button @click="reserveSeat(trip.id)" class="bg-fps-red hover:bg-fps-darkred text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg shadow-sm transition">
+                Solicitar Plaza
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================== PESTAÑA 2: PUBLICAR VIAJE ==================== -->
+      <section v-if="tab === 'publish'" class="bg-white p-6 rounded-xl border border-fps-border shadow-sm max-w-2xl mx-auto">
+        <div class="border-b border-fps-border pb-4 mb-5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-fps-red">Zona de Conductores</span>
+          <h2 class="text-xl font-black text-fps-black uppercase">Ofrecer Plazas en mi Coche</h2>
+          <p class="text-xs text-neutral-500">Publica tu desplazamiento para compartir los gastos del trayecto con otros sevillistas.</p>
+        </div>
+        
+        <div v-if="!token" class="text-center py-8 bg-neutral-50 rounded-xl border border-dashed border-neutral-300 p-6">
+          <p class="text-xs font-bold uppercase text-neutral-700 mb-1">Acceso Requerido</p>
+          <p class="text-xs text-neutral-500 mb-4 max-w-sm mx-auto">Debes iniciar sesión con tu cuenta para publicar un desplazamiento.</p>
+          <button @click="tab = 'auth'" class="bg-fps-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-lg hover:bg-fps-darkred transition shadow-sm">
+            Ir a Identificarme
+          </button>
+        </div>
+
+        <div v-else-if="currentUser && !currentUser.is_driver && !currentUser.is_admin" class="text-center py-8 bg-neutral-50 rounded-xl border border-neutral-300 p-6">
+          <p class="text-xs font-bold uppercase text-fps-red mb-1">Rol de Conductor Desactivado</p>
+          <p class="text-xs text-neutral-500 mb-4 max-w-md mx-auto">Tu cuenta está configurada solo como pasajero. Puedes activar el rol conductor desde tu perfil.</p>
+          <button @click="tab = 'auth'" class="bg-fps-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition">
+            Activar Rol en Mi Cuenta
+          </button>
+        </div>
+
+        <form v-else @submit.prevent="submitTrip" class="space-y-4">
+          
+          <!-- Bloque para alta rápida de partido si está habilitado en app.js -->
+          <div v-if="typeof showNewMatch !== 'undefined'" class="bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-neutral-800 uppercase tracking-wide">¿No encuentras el partido?</span>
+              <button type="button" @click="showNewMatch = !showNewMatch" class="text-xs text-fps-red font-bold uppercase hover:underline">
+                {{ showNewMatch ? 'Cancelar' : '+ Añadir Partido' }}
+              </button>
+            </div>
+
+            <div v-if="showNewMatch" class="mt-3 pt-3 border-t border-neutral-200 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <input v-model="newMatch.home_team" type="text" placeholder="Equipo local" class="p-2.5 border border-neutral-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-fps-red focus:outline-none">
+                <input v-model="newMatch.away_team" type="text" placeholder="Equipo visitante" class="p-2.5 border border-neutral-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-fps-red focus:outline-none">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input v-model="newMatch.stadium" type="text" placeholder="Estadio" class="p-2.5 border border-neutral-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-fps-red focus:outline-none">
+                <input v-model="newMatch.city" type="text" placeholder="Ciudad" class="p-2.5 border border-neutral-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-fps-red focus:outline-none">
+              </div>
+              <input v-model="newMatch.match_date" type="datetime-local" class="w-full p-2.5 border border-neutral-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-fps-red focus:outline-none">
+              <button type="button" @click="createMatch" class="w-full bg-fps-black hover:bg-neutral-800 text-white text-xs font-bold uppercase py-2.5 rounded-lg transition tracking-wider">
+                Guardar y Seleccionar Partido
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Partido / Encuentro</label>
+            <select v-model="newTrip.match_id" required class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+              <option disabled value="">Selecciona un partido</option>
+              <option v-for="m in matches" :key="m.id" :value="m.id">
+                {{ m.home_team }} vs {{ m.away_team }} ({{ m.city }})
+              </option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Ciudad de Salida</label>
+              <input v-model="newTrip.origin_city" required type="text" placeholder="Ej: Sevilla" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Punto de Recogida</label>
+              <input v-model="newTrip.meeting_point" required type="text" placeholder="Ej: Metro Nervión" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Fecha y Hora de Salida</label>
+              <input v-model="newTrip.departure_time" required type="datetime-local" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Hora de Vuelta (opcional)</label>
+              <input v-model="newTrip.return_time" type="datetime-local" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Plazas Disponibles</label>
+              <input v-model.number="newTrip.total_seats" required min="1" max="8" type="number" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Precio por Asiento (€)</label>
+              <input v-model.number="newTrip.price_per_seat" required step="0.5" min="0" type="number" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Vehículo (Modelo / Color)</label>
+            <input v-model="newTrip.vehicle_info" type="text" placeholder="Ej: Seat León blanco" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Notas adicionales</label>
+            <textarea v-model="newTrip.notes" rows="2" placeholder="Ej: Salida puntual desde la gasolinera..." class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-fps-red hover:bg-fps-darkred text-white py-3 rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm transition">
+            Publicar Ruta
+          </button>
+        </form>
+      </section>
+
+      <!-- ==================== PESTAÑA 3: AUTENTICACIÓN / MI CUENTA ==================== zona de usuario conectado-->
+      <section v-if="tab === 'auth'" class="bg-white p-6 rounded-xl border border-fps-border shadow-sm max-w-xl mx-auto">
+        
+        <!-- Sesión iniciada: Perfil y conmutador de roles -->
+        <div v-if="token && currentUser" class="space-y-5">
+          <div class="border-b border-fps-border pb-4 flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-fps-red">Perfil Sevillista</span>
+              <h2 class="text-xl font-black text-fps-black uppercase">{{ currentUser.full_name }}</h2>
+              <p class="text-xs text-neutral-500 font-medium">{{ currentUser.email }}</p>
+            </div>
+            <span v-if="currentUser.is_admin" class="px-2.5 py-1 bg-neutral-900 text-white text-[10px] font-black uppercase rounded tracking-wider">
+              ADMIN
+            </span>
+          </div>
+
+          <div class="p-4 bg-neutral-50 rounded-xl border border-fps-border space-y-3">
+            <h3 class="text-xs font-bold text-fps-black uppercase tracking-wider">Tus Roles en la Plataforma</h3>
+            <p class="text-[11px] text-neutral-500">Activa o desactiva tus funciones según lo que vayas a necesitar:</p>
+
+            <div class="space-y-2 pt-1">
+              <label class="flex items-center justify-between p-3 bg-white rounded-lg border border-neutral-200 cursor-pointer shadow-sm hover:border-fps-red transition">
+                <div>
+                  <p class="text-xs font-bold text-fps-black uppercase tracking-wide">🚗 Rol Conductor</p>
+                  <p class="text-[11px] text-neutral-500">Publicar viajes y ofertar plazas en tu vehículo</p>
+                </div>
+                <input type="checkbox" v-model="currentUser.is_driver" @change="saveRoles" class="h-4 w-4 text-fps-red focus:ring-fps-red rounded border-neutral-300">
+              </label>
+
+              <label class="flex items-center justify-between p-3 bg-white rounded-lg border border-neutral-200 cursor-pointer shadow-sm hover:border-fps-red transition">
+                <div>
+                  <p class="text-xs font-bold text-fps-black uppercase tracking-wide">🎒 Rol Pasajero</p>
+                  <p class="text-[11px] text-neutral-500">Solicitar plazas en coches compartidos</p>
+                </div>
+                <input type="checkbox" v-model="currentUser.is_passenger" @change="saveRoles" class="h-4 w-4 text-fps-red focus:ring-fps-red rounded border-neutral-300">
+              </label>
+            </div>
+</div>
+
+
+		<!-- Panel de Solicitudes para el Conductor -->
+		<div v-if="currentUser.is_driver" class="p-4 bg-neutral-50 rounded-xl border border-fps-border space-y-3">
+		  <div class="flex justify-between items-center">
+			<h3 class="text-xs font-black text-fps-black uppercase tracking-wider">Solicitudes de Pasajeros</h3>
+			<button @click="fetchDriverBookings" class="text-[10px] text-fps-red font-bold uppercase hover:underline">Actualizar</button>
+		  </div>
+		  
+		  <div v-if="driverBookings.length === 0" class="text-xs text-neutral-400">
+			No tienes peticiones de plazas pendientes.
+		  </div>
+
+		  <div v-for="b in driverBookings" :key="b.id" class="p-3 bg-white rounded-lg border border-neutral-200 flex justify-between items-center text-xs shadow-sm">
+			<div class="space-y-1">
+			  <p class="font-bold text-neutral-800">{{ b.passenger.full_name }}</p>
+			  <p class="text-[11px] text-neutral-500">
+				Pide {{ b.seats_requested }} plaza(s) · Estado: <strong class="uppercase text-fps-red">{{ b.status }}</strong>
+			  </p>
+
+			  <!-- Teléfono del solicitante estilo cápsula (solo texto, sin enlace wa.me) -->
+			  <div v-if="b.passenger && b.passenger.phone" class="pt-1">
+				<span class="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200 select-all">
+				  📞 Teléfono: {{ b.passenger.phone }}
+				</span>
+			  </div>
+			</div>
+
+			<!-- Acciones o estado -->
+			<div>
+			  <div v-if="b.status === 'pending'" class="flex gap-2">
+				<button @click="changeBookingStatus(b.id, 'accepted')" class="bg-fps-red hover:bg-fps-darkred text-white px-3 py-1.5 rounded font-bold uppercase tracking-wider text-[10px] transition">
+				  Aceptar
+				</button>
+				<button @click="changeBookingStatus(b.id, 'rejected')" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-3 py-1.5 rounded font-bold uppercase tracking-wider text-[10px] transition">
+				  Rechazar
+				</button>
+			  </div>
+			  <span v-else class="text-[10px] font-bold uppercase px-2.5 py-1 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
+				{{ b.status }}
+			  </span>
+			</div>
+		  </div>
+		</div>
+
+
+				<!-- Panel de Reservas para el Pasajero Protegido -->
+		<div v-if="currentUser && currentUser.is_passenger" class="p-4 bg-neutral-50 rounded-xl border border-fps-border space-y-3">
+		  <div class="flex justify-between items-center">
+			<h3 class="text-xs font-black text-fps-black uppercase tracking-wider">Mis Solicitudes de Viaje</h3>
+			<button @click="fetchPassengerBookings" class="text-[10px] text-fps-red font-bold uppercase hover:underline">Actualizar</button>
+		  </div>
+
+		  <div v-if="passengerBookings.length === 0" class="text-xs text-neutral-400">
+			No has solicitado ninguna plaza todavía.
+		  </div>
+
+		  <div v-for="b in passengerBookings" :key="b.id" class="p-3 bg-white rounded-lg border border-neutral-200 flex justify-between items-center text-xs shadow-sm">
+			<div class="space-y-1">
+			  <!-- Si el viaje asociado existe -->
+			  <template v-if="b.trip">
+				<p class="font-bold text-neutral-800">
+				  {{ b.trip.origin_city }} ➔ {{ b.trip.match ? b.trip.match.city : 'Destino' }}
+				</p>
+				<p v-if="b.trip.match" class="text-[11px] text-neutral-500">
+				  Partido: {{ b.trip.match.home_team }} vs {{ b.trip.match.away_team }}
+				</p>
+				
+					  <!-- Teléfono del solicitante estilo cápsula (solo texto, sin enlace wa.me) -->
+			  <div v-if="b.passenger && b.passenger.phone" class="pt-1">
+				<span class="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200 select-all">
+				  📞 Teléfono: {{ b.passenger.phone }}
+				</span>
+			  </div>
+			</div>
+				
+				
+				<!-- Teléfono / WhatsApp si la solicitud está aceptada -->
+				<div v-if="b.status === 'accepted' && b.trip.driver && b.trip.driver.phone" class="pt-1">
+				  <span class="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200 select-all">
+				  💬 WhatsApp Conductor ({{ b.trip.driver.phone }})
+				  </span>
+				  <!--
+				  <a :href="'https://wa.me/34' + b.trip.driver.phone" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">
+					💬 WhatsApp Conductor ({{ b.trip.driver.phone }})
+				  </a>
+				  -->
+				</div>
+			  </template>
+
+			  <!-- Respaldo si el viaje ya no existe o no cargó -->
+			  <template v-else>
+				<p class="font-bold text-neutral-500">Viaje #{{ b.trip_id }}</p>
+				<p class="text-[11px] text-neutral-400">Plazas pedidas: {{ b.seats_requested }}</p>
+			  </template>
+			</div>
+
+			<!-- Indicador de estado -->
+			<div>
+			  <span v-if="b.status === 'accepted'" class="text-[10px] font-bold uppercase px-2.5 py-1 rounded bg-green-100 text-green-800 border border-green-200">
+				Aceptada
+			  </span>
+			  <span v-else-if="b.status === 'rejected'" class="text-[10px] font-bold uppercase px-2.5 py-1 rounded bg-red-100 text-red-800 border border-red-200">
+				Rechazada
+			  </span>
+			  <span v-else class="text-[10px] font-bold uppercase px-2.5 py-1 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
+				Pendiente
+			  </span>
+			</div>
+		  </div>
+		</div>
+
+
+
+          
+		  <!-- LOGOUT -->
+
+		  <button @click="logout" class="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition border border-neutral-300">
+            Cerrar Sesión
+          </button>
+        </div>
+
+        <!-- Sin sesión: Pestañas Login / Registro -->
+        <div v-else>
+          <div class="flex border-b border-fps-border mb-5">
+            <button @click="authMode = 'login'" :class="authMode === 'login' ? 'text-fps-red font-black border-b-2 border-fps-red' : 'text-neutral-400 font-bold'" class="pb-2.5 px-4 text-xs uppercase tracking-wider transition">
+              Iniciar Sesión
+            </button>
+            <button @click="authMode = 'register'" :class="authMode === 'register' ? 'text-fps-red font-black border-b-2 border-fps-red' : 'text-neutral-400 font-bold'" class="pb-2.5 px-4 text-xs uppercase tracking-wider transition">
+              Crear Cuenta
+            </button>
+          </div>
+
+          <!-- Login -->
+          <form v-if="authMode === 'login'" @submit.prevent="loginUser" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Email</label>
+              <input v-model="loginForm.email" required type="email" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Contraseña</label>
+              <input v-model="loginForm.password" required type="password" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <button type="submit" class="w-full bg-fps-black hover:bg-neutral-900 text-white py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition shadow-sm">
+              Entrar
+            </button>
+          </form>
+
+          <!-- Registro -->
+          <form v-else @submit.prevent="registerUser" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Nombre Completo</label>
+              <input v-model="regForm.full_name" required type="text" placeholder="Ej: Manuel Pérez" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Email</label>
+              <input v-model="regForm.email" required type="email" placeholder="usuario@correo.com" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Teléfono (WhatsApp)</label>
+              <input v-model="regForm.phone" type="tel" placeholder="600 000 000" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Equipo / Peña Sevillista</label>
+              <input v-model="regForm.favorite_team" type="text" placeholder="Ej: Peña Sevillista San Bernardo" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Contraseña</label>
+              <input v-model="regForm.password" required type="password" class="w-full p-2.5 rounded-lg border border-neutral-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-fps-red focus:outline-none">
+            </div>
+
+            <!-- Elección de roles en el registro si está en regForm -->
+            <div class="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-700 mb-2">Roles iniciales:</span>
+              <div class="flex gap-4">
+                <label class="flex items-center text-xs text-neutral-700 gap-1.5 cursor-pointer font-medium">
+                  <input type="checkbox" v-model="regForm.is_passenger" class="rounded text-fps-red focus:ring-fps-red border-neutral-300">
+                  Pasajero
+                </label>
+                <label class="flex items-center text-xs text-neutral-700 gap-1.5 cursor-pointer font-medium">
+                  <input type="checkbox" v-model="regForm.is_driver" class="rounded text-fps-red focus:ring-fps-red border-neutral-300">
+                  Conductor
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-fps-red hover:bg-fps-darkred text-white py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition shadow-sm">
+              Registrarse
+            </button>
+          </form>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ==================== PIE INSTITUCIONAL ==================== -->
+    <footer class="bg-fps-black text-neutral-400 text-xs py-8 border-t-2 border-fps-red mt-auto">
+      <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-fps-red rounded flex items-center justify-center text-white font-black text-xs font-title">
+            FPS
+          </div>
+          <div>
+            <p class="font-bold text-white text-xs uppercase">Federación de Peñas Sevillistas "San Fernando"</p>
+            <p class="text-[11px] text-neutral-500">Estadio Ramón Sánchez-Pizjuán · Sevilla</p>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-neutral-500 text-center sm:text-right">
+          <p>© 2026 FPS Viajes · Todos los derechos reservados.</p>
+          <p class="text-[10px] text-neutral-600">Herramienta interna de desplazamientos sevillistas.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
