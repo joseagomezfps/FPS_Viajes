@@ -29,8 +29,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # En producción especificar el dominio del frontend
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    # allow_methods=["*"],
+    # allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
