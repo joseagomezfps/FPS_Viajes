@@ -7,8 +7,8 @@ import os
 # Configuración del servidor de correo
 SMTP_SERVER = os.getenv("SMTP_SERVER", "correo.fpsevillistas.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME", "fps_viajes@fpsevillistas.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "Fps@2026")
+SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "FPS Viajes <fps_viajes@fpsevillistas.com>")
 
 def send_email_notification(to_email: str, subject: str, html_body: str):
