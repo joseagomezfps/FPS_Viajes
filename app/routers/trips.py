@@ -43,7 +43,7 @@ def publish_trip(
     db.refresh(trip)
     return trip
 
-# 1. Enviar email al conductor cuando el pasajero solicita viaje:
+# 1.Enviar email al conductor cuando el pasajero solicita viaje:
 @router.post("/book", response_model=schemas.BookingResponse, status_code=status.HTTP_201_CREATED)
 def book_trip(
     booking_in: schemas.BookingCreate,
